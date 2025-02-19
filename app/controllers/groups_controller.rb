@@ -13,6 +13,7 @@ class GroupsController < ApplicationController
   # GET /groups/new
   def new
     @group = Group.new
+    @group.enrollments.build
   end
 
   # GET /groups/1/edit
@@ -22,6 +23,7 @@ class GroupsController < ApplicationController
   # POST /groups or /groups.json
   def create
     @group = Group.new(group_params)
+    @group.leader_id = current_user.id
 
     respond_to do |format|
       if @group.save
@@ -52,7 +54,7 @@ class GroupsController < ApplicationController
     @group.destroy!
 
     respond_to do |format|
-      format.html { redirect_to groups_url, notice: "Group was successfully destroyed." }
+      format.html { redirect_to my_groups_path(current_user.name), notice: "Group was successfully destroyed." }
       format.json { head :no_content }
     end
   end
@@ -65,6 +67,6 @@ class GroupsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def group_params
-      params.require(:group).permit(:name, :leader_id, :enrollments_count)
+      params.require(:group).permit(:name, enrollments_attributes: [:user_id, :_destroy])
     end
 end
