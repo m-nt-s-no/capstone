@@ -1,27 +1,36 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: %i[ show events groups messages calendar ]
+  before_action :set_user, only: %i[ index show events groups messages calendar ]
 
   def index
-    @users = User.all
+    if @user.role == "teacher"
+      @users = User.all
+    else
+      @users = User.where(:role => "teacher") #parents cannot see other parents in directory
+    end
+    authorize @user
   end
 
   def show
+    authorize @user
   end
 
   def events
+    authorize @user
   end
 
   def groups
+    authorize @user
   end
 
   def messages
     @received_msgs = @user.received_messages.order(created_at: :desc)
     @sent_msgs = @user.sent_messages.order(created_at: :desc)
+    authorize @user
   end
 
   def calendar
     start_date = Date.today.to_date
-    @my_calendar = @user.calendar.where(starts_at: start_date.beginning_of_month..start_date.end_of_month)
+    authorize @user
   end
 
   private
